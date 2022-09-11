@@ -1,4 +1,4 @@
-from turtle import right
+from turtle import left, right
 
 
 class BST:
@@ -10,18 +10,24 @@ class BST:
         self.width = BST.NODE_WIDTH
         self.height = 0
     def insert(self, key):
+        
         if key < self.key:
             if self.left is None:
                 self.left = BST(key)
             else:
-                self.left.insert(key)
+                self.left = self.left.insert(key)
         elif key > self.key:
             if self.right is None:
                 self.right = BST(key)
             else:
-                self.right.insert(key)
+                self.right = self.right.insert(key)
+                
         self.update_height()
-        self.update_width()
+        
+        root = self.rebalance()
+        return root
+        
+    
 
     def update_height(self):
         right_height = -1
@@ -78,19 +84,81 @@ class BST:
             return "0" + str(self.key)
         return str(self.key)
 
+    def rebalance(self):
+        right_height = -1
+        left_height = -1
+        if self.right is not None:
+            right_height = self.right.height
+        if self.left is not None:
+            left_height = self.left.height
+        root = self
+        diff = right_height - left_height
+        if diff < -1: #left imbalance so right rotate
+            left_of_left_height = -1
+            right_of_left_height = -1
+            if root.left.left is not None:
+                left_of_left_height = root.left.left.height
+            if root.left.right is not None:
+                right_of_left_height = root.left.right.height
+            if right_of_left_height > left_of_left_height:
+                self.left = self.left.left_rotate()
+            root = self.right_rotate()
+
+      
+        elif diff > 1:
+
+            left_of_right_height = -1
+            right_of_right_height = -1
+            if root.right.left is not None:
+                left_of_right_height = root.right.left.height
+            if root.right.right is not None:
+                right_of_right_height = root.right.right.height
+            if right_of_right_height < left_of_right_height:
+                self.right = self.right.right_rotate()
+            root = self.left_rotate()
+
+
+        
+        self.update_width()
+        # root.update_width()
+        
+        return root
+
+
+    def right_rotate(self):
+        right_child_of_left = self.left.right
+        root = self.left
+        root.right = self
+        self.left = right_child_of_left
+        self.update_height()
+        root.update_height()
+        return root
+    def left_rotate(self):
+        left_child_of_right = self.right.left
+        root = self.right
+        root.left = self
+        self.right = left_child_of_right
+        self.update_height()
+        root.update_height()
+        return root
 
 
                 
 
 tree = BST(5)
-tree.insert(3)
-tree.insert(2)
-tree.insert(4)
-tree.insert(13)
-tree.insert(19)
-tree.insert(10)
-tree.insert(8)
-tree.insert(12)
+tree = tree.insert(1)
+tree = tree.insert(3)
+tree = tree.insert(2)
+tree = tree.insert(4)
+tree = tree.insert(13)
+tree = tree.insert(19)
+tree = tree.insert(20)
+tree = tree.insert(10)
+tree = tree.insert(8)
+tree = tree.insert(12)
+
+
+
 
 
 print(tree.draw())
