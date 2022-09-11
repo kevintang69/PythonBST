@@ -1,9 +1,14 @@
+from turtle import right
+
+
 class BST:
     NODE_WIDTH = 2
     def __init__(self, key):
         self.key = key
         self.right = None
         self.left = None
+        self.width = BST.NODE_WIDTH
+        self.height = 0
     def insert(self, key):
         if key < self.key:
             if self.left is None:
@@ -15,24 +20,57 @@ class BST:
                 self.right = BST(key)
             else:
                 self.right.insert(key)
-    def width(self):
+        self.update_height()
+        self.update_width()
+
+    def update_height(self):
+        right_height = -1
+        left_height = -1
+        if self.left is not None:
+            left_height = self.left.height
+        if self.right is not None:
+            right_height = self.right.height
+        self.height = 1 + max(right_height, left_height)
+
+    def update_width(self):
         total = BST.NODE_WIDTH
         if self.left is not None:
-            total += self.left.width()
+            total += self.left.width
         if self.right is not None:
-            total +=  self.right.width()
-        return total
-    def visual(self, start):
-        width_right = 0
-        width_left = 0
+            total +=  self.right.width
+        self.width = total
+
+    def draw(self):
+        q = [(0, self.compute_pos(0),self)]
+        
+        total_str = ""
+        while len(q) > 0:
+            newq = []
+            current_line = ""
+            for start,pos, node in q:
+                if node.left is not None:
+                    left_child_pos = node.left.compute_pos(start)
+                    newq.append((start, left_child_pos,node.left))
+
+                    current_line += (left_child_pos - len(current_line)) * " "
+                    current_line += (pos - len(current_line)) * "_"
+                current_line += (pos - len(current_line))*" "
+                current_line += node.zeropad()
+                if node.right is not None:
+                    right_start = pos+BST.NODE_WIDTH
+                    right_child_pos = node.right.compute_pos(right_start)
+                    newq.append((right_start,right_child_pos,node.right))
+                    current_line += (right_child_pos - len(current_line) + BST.NODE_WIDTH) * "_"
+            q = newq
+            total_str += current_line + "\n"
+        return total_str
+
+
+    def compute_pos(self,start):
+        pos = start
         if self.left is not None:
-            width_left = self.left.width()
-            self.left.visual(start)
-
-        self.pos = start + width_left
-
-        if self.right is not None:
-            self.right.visual(self.pos + BST.NODE_WIDTH)
+            pos += self.left.width
+        return pos
 
 
     def zeropad(self):
@@ -40,32 +78,6 @@ class BST:
             return "0" + str(self.key)
         return str(self.key)
 
-
-    def draw(level):
-        current_string = ""
-        for node in level:
-            if node.left is not None:
-                current_string += (node.left.pos-len(current_string))*" "
-                current_string += (node.pos - len(current_string))*"_"
-            current_string += (node.pos - len(current_string))*" "
-
-            current_string += node.zeropad()
-            if node.right is not None:
-                current_string += (node.right.pos - len(current_string) + BST.NODE_WIDTH)*"_"
-        return current_string
-    def printtree(self):
-        q= [self]
-        total_str = ""
-        while q:
-            total_str += BST.draw(q) + "\n"
-            new_q  = []
-            for node in q:
-                if node.left is not None:
-                    new_q.append(node.left)
-                if node.right is not None:
-                    new_q.append(node.right)
-            q = new_q
-        return total_str
 
 
                 
@@ -80,8 +92,8 @@ tree.insert(10)
 tree.insert(8)
 tree.insert(12)
 
-tree.visual(0)
-print(tree.printtree())
+
+print(tree.draw())
 
 
    
